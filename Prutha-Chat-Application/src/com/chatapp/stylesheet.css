@@ -1,0 +1,56 @@
+/* style.css */
+
+/* Body */
+.root {
+    background-color: red/* Light Gray */
+}
+
+/* Buttons */
+.registerbutton {
+    background-color: #4CAF50; /* Green */
+    -fx-text-fill: cyan;
+    --webkit-font-size: 14px;
+    padding: 8px 16px;
+    border-radius: 4px;
+    -fx-background-radius: 4px;
+}
+
+.button:hover {
+    background-color: #45a049; /* Darker Green */
+}
+
+/* Text Fields */
+.text-field {
+    background-color: #ffffff; /* White */
+    border-color: #ccc; /* Light Gray */
+    border-width: 1px;
+    border-radius: 4px;
+    -fx-background-radius: 4px;
+    padding: 6px;
+}
+
+/* Labels */
+.label {
+    font-size: 16px;
+    -fx-text-fill: #333; /* Dark Gray */
+}
+
+/* Combo Box */
+.combo-box {
+    -fx-background-color: #ffffff; /* White */
+    -fx-border-color: #ccc; /* Light Gray */
+    -fx-border-width: 1px;
+    -fx-border-radius: 4px;
+    -fx-background-radius: 4px;
+    -fx-padding: 6px;
+}
+
+/* Alert */
+.dialog-pane {
+    -fx-font-size: 14px;
+}
+
+.alert {
+    -fx-background-color: #f44336; /* Red */
+    -fx-text-fill: white;
+}
