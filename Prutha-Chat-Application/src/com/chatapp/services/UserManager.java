@@ -2,6 +2,7 @@ package com.chatapp.services;
 
 import com.chatapp.database.DatabaseManager;
 import com.chatapp.models.RegisterUser;
+import com.chatapp.utils.CaesarCipher;
 
 import java.sql.Connection;
 import java.sql.PreparedStatement;
@@ -33,6 +34,7 @@ public class UserManager {
     private final AtomicInteger userIdCnt = new AtomicInteger(0);
     private RegisterUser currentUser;
     private Map<String, Boolean> loggedInUsers = new HashMap<>(); // Map to store logged-in status of users
+    
 
     // Other methods in the UserManager class...
 
@@ -68,7 +70,8 @@ public class UserManager {
      */
     public void registerUser(String name, String userName, String password) {
         int newId = generateUserId();
-        RegisterUser regUser = new RegisterUser(newId, name, userName, password);
+        String encryptedPassword = CaesarCipher.encrypt(password, 3);
+        RegisterUser regUser = new RegisterUser(newId, name, userName, encryptedPassword);
         registerUsers.add(regUser);
         databaseManager.storeRegisteredUser(regUser);
 
@@ -84,44 +87,84 @@ public class UserManager {
      * @param password The authentication password of the user.
      * @return The authenticated user if credentials are valid, or {@code null} if authentication fails.
      */
+    // public RegisterUser login(String username, String password) {
+    //     try (Connection connection = databaseManager.getConnection()) {
+    //         String sql = "SELECT * FROM User WHERE username = ? AND password = ?";
+    //         PreparedStatement preparedStatement = connection.prepareStatement(sql);
+    //         preparedStatement.setString(1, username);
+    //         preparedStatement.setString(2, password);
+
+    //         ResultSet resultSet = preparedStatement.executeQuery();
+
+    //         if (resultSet.next()) {
+    //             int userId = resultSet.getInt("userId");
+    //             String name = resultSet.getString("name");
+    //             String dbUsername = resultSet.getString("username");
+    //             String dbPassword = resultSet.getString("password");
+
+    //             RegisterUser loggedInUser = new RegisterUser(userId, name, dbUsername, dbPassword);
+    //             loggedInUser.setUserStatus(true);
+
+    //             // Update user status to online in the database
+    //             databaseManager.updateUserOnlineStatus(loggedInUser);
+    //             loggedInUsers.put(username, true);
+
+    //             // currentUser = loggedInUser; // seting the current user
+
+    //             if (loggedInUser != null) {
+    //                 currentUser = loggedInUser; // Set the current user upon successful login
+    //             }
+            
+    //             return loggedInUser;
+
+    //             // return loggedInUser;
+    //         }
+    //     } catch (SQLException e) {
+    //         e.printStackTrace();
+    //     }
+
+    //     return null; // Login failed...
+    // }
+
     public RegisterUser login(String username, String password) {
         try (Connection connection = databaseManager.getConnection()) {
+            // Encrypt the provided password before querying the database
+            String encryptedPassword = CaesarCipher.encrypt(password, 3); // Use the same shift key as during registration
+    
             String sql = "SELECT * FROM User WHERE username = ? AND password = ?";
             PreparedStatement preparedStatement = connection.prepareStatement(sql);
             preparedStatement.setString(1, username);
-            preparedStatement.setString(2, password);
-
+            preparedStatement.setString(2, encryptedPassword); // Use the encrypted password in the query
+    
             ResultSet resultSet = preparedStatement.executeQuery();
-
+    
             if (resultSet.next()) {
                 int userId = resultSet.getInt("userId");
                 String name = resultSet.getString("name");
                 String dbUsername = resultSet.getString("username");
-                String dbPassword = resultSet.getString("password");
-
+                String dbPassword = resultSet.getString("password"); // No need to decrypt
+    
+                // Decrypt the password from the database if necessary (depending on your implementation)
+                // String decryptedPassword = CaesarCipher.decrypt(dbPassword, 3);
+    
                 RegisterUser loggedInUser = new RegisterUser(userId, name, dbUsername, dbPassword);
                 loggedInUser.setUserStatus(true);
-
+    
                 // Update user status to online in the database
                 databaseManager.updateUserOnlineStatus(loggedInUser);
                 loggedInUsers.put(username, true);
-
-                // currentUser = loggedInUser; // seting the current user
-
-                if (loggedInUser != null) {
-                    currentUser = loggedInUser; // Set the current user upon successful login
-                }
-            
+    
+                currentUser = loggedInUser; // Set the current user upon successful login
+    
                 return loggedInUser;
-
-                // return loggedInUser;
             }
         } catch (SQLException e) {
             e.printStackTrace();
         }
-
+    
         return null; // Login failed...
     }
+    
 
     /**
      * Updates the user's status to offline in both the application session and the database.
@@ -153,7 +196,17 @@ public class UserManager {
     public RegisterUser getUserByUsername(String username) {
         return databaseManager.fetchUserByUsername(username);
     }
-
+    public void logoutAllUsersOnExit() {
+        for (Map.Entry<String, Boolean> entry : loggedInUsers.entrySet()) {
+            if (entry.getValue()) { // Check if the user is logged in
+                RegisterUser user = getUserByUsername(entry.getKey());
+                if (user != null) {
+                    logout(user);
+                    System.out.println("Logged out user '" + user.getUserName() + "' on program exit.");
+                }
+            }
+        }
+    }
 
     
 }

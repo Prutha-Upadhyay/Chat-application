@@ -20,7 +20,7 @@ public class RegisterUser extends User {
     private final List<String> messagesSent = new ArrayList<>();
     private String userName;
     private String password;
-
+    List<String> privileges;
     public RegisterUser(int userId, String name, String userName, String password) {
         super(userId, name);
         this.userName = userName;
@@ -85,4 +85,16 @@ public class RegisterUser extends User {
     public void setPassword(String password) {
         this.password = password;
     }
+
+    public boolean hasPrivilege(String privilege) {
+        // Assuming privileges are stored in a list or set
+        privileges = getPrivileges(); // Assuming getPrivileges() returns a list of privileges for the user
+        return privileges.contains(privilege);
+    }
+
+    public List<String> getPrivileges() {
+        // Assuming privileges are stored as a list of strings in the user object
+        return this.privileges;
+    }
+    
 }

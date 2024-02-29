@@ -1,0 +1,5 @@
+<dependency>
+    <groupId>io.netty</groupId>
+    <artifactId>netty-socketio</artifactId>
+    <version>1.2.1</version>
+</dependency>
